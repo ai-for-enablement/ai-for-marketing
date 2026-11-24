@@ -1,0 +1,57 @@
+# Campaign QA settings. Copy this file into your campaign folder as campaign.toml,
+# then replace every value with your own. reference/checks.md explains each setting.
+
+[campaign]
+name = "summer-launch-2027"                # every utm_campaign must equal this
+name_pattern = "^[a-z0-9]+(-[a-z0-9]+)*$"  # lowercase words joined by hyphens
+launch_date = "2027-06-01"
+
+[brand]
+# Read by the AI review, not the script. Write these the way you'd brief a new copywriter.
+voice = "Warm and direct. No all caps, at most one exclamation mark per asset."
+offer_scope = "15% off annual plans for new customers. Monthly plans are not included."
+
+[utm]
+required = ["utm_source", "utm_medium", "utm_campaign"]
+allowed_mediums = ["email", "social", "cpc"]
+allowed_sources = ["newsletter", "linkedin", "instagram", "google"]
+lowercase = true
+tracked_domains = ["example.com"]   # your own sites: links here must carry UTM tags
+
+[utm.channels]   # folder name = the utm_medium its links must use
+email = "email"
+social = "social"
+
+[links]
+blocked_hosts = ["localhost", "127.0.0.1", "staging.example.com"]
+require_https = true
+
+# Approved facts. Every match of the pattern must equal the expected value.
+# If the pattern has a (group), only the group is compared.
+[[facts]]
+name = "promo code"
+pattern = '\b[A-Z]{4,}\d{2}\b'
+expected = "SUMMER15"
+
+[[facts]]
+name = "discount"
+pattern = '\b\d{1,2}% off\b'
+expected = "15% off"
+case_sensitive = false
+
+[[facts]]
+name = "end date"
+pattern = '\b(?:ends|until|through)\s+((?:June|July)\s+\d{1,2})\b'
+expected = "June 30"
+case_sensitive = false
+
+[landing]
+file = "landing.html"
+tracking_patterns = ['googletagmanager\.com/gtag/js']   # your analytics snippet
+required_form_fields = ["email"]
+hidden_utm_fields = true   # the form must pass UTM values to your CRM
+
+[claims]
+# Lines with these words, or with numbers that aren't approved facts, go to the review list.
+flag_words = ["best", "#1", "guaranteed", "fastest", "cheapest", "only", "never", "always", "free"]
+flag_numbers = true

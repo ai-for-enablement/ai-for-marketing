@@ -1,0 +1,55 @@
+# Campaign QA settings for Tidewater Bikes' spring sale (a fictional company).
+# Copy this file into your own campaign folder and change the values.
+
+[campaign]
+name = "spring-sale-2027"                  # every utm_campaign must equal this
+name_pattern = "^[a-z0-9]+(-[a-z0-9]+)*$"  # lowercase words joined by hyphens
+launch_date = "2027-03-15"
+
+[brand]
+# Read by the AI review step, not the script.
+voice = "Friendly, plain-spoken, outdoorsy. No all-caps shouting, no more than one exclamation mark per asset."
+offer_scope = "25% off all e-bikes and accessories. Regular bikes are not on sale."
+
+[utm]
+required = ["utm_source", "utm_medium", "utm_campaign"]
+allowed_mediums = ["email", "social", "cpc"]
+allowed_sources = ["newsletter", "linkedin", "instagram", "google"]
+lowercase = true
+tracked_domains = ["tidewaterbikes.example"]   # your own sites: links here must carry UTM tags
+
+[utm.channels]   # folder name -> the utm_medium its links must use
+email = "email"
+social = "social"
+
+[links]
+blocked_hosts = ["localhost", "127.0.0.1", "staging.tidewaterbikes.example"]
+require_https = true
+
+# Approved facts. Every mention that matches the pattern must equal the approved value.
+[[facts]]
+name = "promo code"
+pattern = '\b[A-Z]{4,}\d{2}\b'
+expected = "SPRING25"
+
+[[facts]]
+name = "discount"
+pattern = '\b\d{1,2}% off\b'
+expected = "25% off"
+case_sensitive = false
+
+[[facts]]
+name = "end date"
+pattern = '\b(?:ends|until|through)\s+((?:March|April)\s+\d{1,2})\b'   # the (group) is what gets compared
+expected = "March 31"
+case_sensitive = false
+
+[landing]
+file = "landing.html"
+tracking_patterns = ['googletagmanager\.com/gtag/js']
+required_form_fields = ["email"]
+hidden_utm_fields = true
+
+[claims]
+flag_words = ["best", "#1", "guaranteed", "fastest", "cheapest", "only", "never", "always", "free"]
+flag_numbers = true

@@ -1,0 +1,187 @@
+# What Campaign QA should find in examples/tidewater-spring-sale.
+# Every mistake in that campaign was planted on purpose and is listed here.
+#
+# [[script]]   findings the script must report: exactly these, no more, no fewer.
+# [[judgment]] mistakes only a careful reader can catch. The AI review should find them.
+#              A finding counts as a match when its asset is the same and its quote or
+#              reason contains one of the keywords.
+
+campaign = "examples/tidewater-spring-sale"
+
+# ---- launch email
+[[script]]
+check = "utm-channel"
+asset = "email/launch-email.html"
+line = 6
+note = "The email's main link is tagged utm_medium=social."
+
+[[script]]
+check = "alt-text"
+asset = "email/launch-email.html"
+line = 5
+note = "Hero image has no alt text."
+
+[[script]]
+check = "insecure-link"
+asset = "email/launch-email.html"
+line = 7
+note = "FAQ link uses http://."
+
+# ---- reminder email
+[[script]]
+check = "fact-mismatch"
+asset = "email/reminder-email.md"
+line = 3
+note = "End date says April 1; the approved date is March 31."
+
+[[script]]
+check = "malformed-url"
+asset = "email/reminder-email.md"
+line = 7
+note = "Space in the URL (news%20letter)."
+
+[[script]]
+check = "utm-format"
+asset = "email/reminder-email.md"
+line = 7
+note = "utm_source has a space."
+
+[[script]]
+check = "utm-case"
+asset = "email/reminder-email.md"
+line = 7
+note = "utm_campaign has capital letters."
+
+[[script]]
+check = "utm-source"
+asset = "email/reminder-email.md"
+line = 7
+note = "utm_source isn't an allowed source."
+
+[[script]]
+check = "claim"
+asset = "email/reminder-email.md"
+line = 3
+note = "Sent to review: 'Only' and 'free'."
+
+# ---- landing page
+[[script]]
+check = "utm-capture"
+asset = "landing.html"
+note = "Form has no hidden utm_source field."
+
+[[script]]
+check = "utm-capture"
+asset = "landing.html"
+note = "Form has no hidden utm_medium field."
+
+[[script]]
+check = "utm-capture"
+asset = "landing.html"
+note = "Form has no hidden utm_campaign field."
+
+[[script]]
+check = "fact-mismatch"
+asset = "landing.html"
+line = 11
+note = "Headline offer says 20% off; the approved discount is 25%."
+
+[[script]]
+check = "claim"
+asset = "landing.html"
+line = 11
+note = "Sent to review: the unapproved 20%."
+
+# ---- LinkedIn post
+[[script]]
+check = "blocked-host"
+asset = "social/linkedin.md"
+line = 5
+note = "Links to the staging site."
+
+[[script]]
+check = "utm-medium"
+asset = "social/linkedin.md"
+line = 5
+note = "utm_medium=paid-social isn't an allowed medium."
+
+[[script]]
+check = "utm-channel"
+asset = "social/linkedin.md"
+line = 5
+note = "Social post's medium isn't 'social'."
+
+[[script]]
+check = "claim"
+asset = "social/linkedin.md"
+line = 1
+note = "Sent to review: 'best' and '3x'."
+
+# ---- Instagram post
+[[script]]
+check = "fact-mismatch"
+asset = "social/instagram.md"
+line = 1
+note = "Promo code typo: SPRNG25."
+
+[[script]]
+check = "malformed-url"
+asset = "social/instagram.md"
+line = 4
+note = "Doubled ?? in the URL."
+
+[[script]]
+check = "utm-missing"
+asset = "social/instagram.md"
+line = 4
+note = "No utm_campaign."
+
+[[script]]
+check = "claim"
+asset = "social/instagram.md"
+line = 3
+note = "Sent to review: 'Guaranteed'."
+
+# ---- judgment calls
+
+[[judgment]]
+id = "cta-to-homepage"
+asset = "email/launch-email.html"
+keywords = ["shop the sale", "homepage", "home page"]
+note = "'Shop the sale' links to the homepage, not the sale page."
+
+[[judgment]]
+id = "scope-all-bikes"
+asset = "email/launch-email.html"
+keywords = ["all bikes"]
+note = "'25% off all bikes', but only e-bikes and accessories are on sale."
+
+[[judgment]]
+id = "biggest-sale"
+asset = "email/launch-email.html"
+keywords = ["biggest"]
+note = "'Our biggest sale of the year' has no support."
+
+[[judgment]]
+id = "free-shipping"
+asset = "email/reminder-email.md"
+keywords = ["ships free", "free shipping"]
+note = "Promises free shipping, which isn't part of the approved offer."
+
+[[judgment]]
+id = "savings-3x"
+asset = "social/linkedin.md"
+keywords = ["3x"]
+note = "'Save 3x on commuting costs' has no source."
+
+[[judgment]]
+id = "all-caps"
+asset = "social/instagram.md"
+keywords = ["caps", "capital", "exclamation", "!!!", "shout"]
+note = "All caps and six exclamation marks break the brand voice."
+
+[[judgment]]
+id = "guaranteed-delivery"
+asset = "social/instagram.md"
+keywords = ["guarantee"]
+note = "'Guaranteed delivery' is a promise the shop may not be able to keep."
