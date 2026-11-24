@@ -6,19 +6,21 @@ Each finding has a check name, a severity and a location. **Errors** should bloc
 
 | Setting | What it does |
 |---|---|
-| `[campaign] name` | The value every `utm_campaign` must match. |
+| `[campaign] name` | Required. The value every `utm_campaign` must match. |
 | `[campaign] name_pattern` | A regular expression the campaign name itself must follow. |
 | `[brand] voice`, `offer_scope` | Used only by the AI review, to judge tone and offer drift. |
 | `[utm] required` | UTM parameters every link to your own sites must carry. |
 | `[utm] allowed_mediums`, `allowed_sources` | The only values allowed for `utm_medium` and `utm_source`. |
 | `[utm] lowercase` | UTM values must be lowercase, so reports don't split "Email" from "email". |
-| `[utm] tracked_domains` | Your own domains. Only links to these are checked for UTM tags. Subdomains count. |
+| `[utm] tracked_domains` | Required. Your own domains. Only links to these are checked for UTM tags. Subdomains count. |
 | `[utm.channels]` | Maps a folder name to the `utm_medium` its links must use. |
 | `[links] blocked_hosts` | Hosts that must never appear in a live campaign, like staging or localhost. |
 | `[links] require_https` | Warns on `http://` links. |
 | `[[facts]]` | Approved values. Every match of `pattern` must equal `expected`. If the pattern has a group, only the group is compared. |
 | `[landing]` | The landing page file, its analytics snippet, required form fields, and whether the form must capture UTM values. |
-| `[claims]` | Words and numbers that send a line to the review list. |
+| `[claims]` | Words and numbers that send a line to the review list. A number that appears in an approved fact, like the 15% in "15% off", isn't flagged. |
+
+If a required setting is missing, a setting has the wrong type, or a pattern isn't a valid regular expression, the script stops with exit code 2 and names the setting, rather than skipping the checks it drives.
 
 ## Checks
 
@@ -39,7 +41,7 @@ Each finding has a check name, a severity and a location. **Errors** should bloc
 | `landing-missing` | error | The landing page file isn't in the folder. | Add it, or fix `[landing] file`. |
 | `tracking` | error | The landing page has no analytics snippet. | Add your tag. |
 | `form` | error | The landing page has no form, or the form lacks a required field. | Add the form or field. |
-| `utm-capture` | error | The form doesn't pass a UTM value to your CRM in a hidden field. | Add a hidden field for each required UTM parameter. |
+| `utm-capture` | error | The form doesn't pass a UTM value to your CRM in a hidden field. Fields outside the form, disabled fields and visible fields don't count. | Add a hidden field inside the form for each required UTM parameter. |
 | `page-meta` | warning | The landing page has no title or meta description. | Add them; they show in search results and link previews. |
 | `alt-text` | warning | An image has no `alt` attribute. | Describe the image, or use `alt=""` if it's decoration. |
 | `claim` | review | A line uses a flagged word or an unapproved number. | Confirm a source or approval, or reword. |

@@ -196,6 +196,74 @@ class Claims(CampaignCase):
         self.assertIn(("naming", "campaign.toml"), self.checks({}, config))
 
 
+class ReviewFixes(CampaignCase):
+    """Cases from the 2026-11-24 Codex review."""
+
+    def test_form_fields_outside_the_form_dont_count(self):
+        moved = LANDING.replace('<input name="email">', "").replace("</form></body>", '</form><input name="email"></body>')
+        self.assertIn(("form", "landing.html"), self.checks({"landing.html": moved}))
+
+    def test_form_attribute_links_a_field_to_its_form(self):
+        linked = (LANDING.replace("<form action=", '<form id="f" action=').replace('<input name="email">', "")
+                  .replace("</form></body>", '</form><input name="email" form="f"></body>'))
+        self.assertNotIn(("form", "landing.html"), self.checks({"landing.html": linked}))
+
+    def test_visible_or_disabled_utm_fields_dont_count(self):
+        visible = LANDING.replace('<input type="hidden" name="utm_source">', '<input type="text" name="utm_source">')
+        self.assertIn(("utm-capture", "landing.html"), self.checks({"landing.html": visible}))
+        disabled = LANDING.replace('<input type="hidden" name="utm_source">', '<input type="hidden" name="utm_source" disabled>')
+        self.assertIn(("utm-capture", "landing.html"), self.checks({"landing.html": disabled}))
+
+    def test_meta_description_in_any_attribute_order(self):
+        swapped = LANDING.replace('<meta name="description" content="Fall promo.">', "<meta content='Fall promo.' name='description'>")
+        self.assertNotIn(("page-meta", "landing.html"), self.checks({"landing.html": swapped}))
+
+    def test_unparseable_and_hostless_urls_are_findings(self):
+        bad = '<a href="https://[bad/sale">Shop</a>'
+        self.assertIn(("malformed-url", "email/launch.html"), self.checks({"email/launch.html": bad}))
+        self.assertIn(("malformed-url", "email/launch.md"), self.checks(self.email("See https:///sale\n")))
+
+    def test_uppercase_scheme_and_network_relative_links_are_checked(self):
+        html = '<a href="HTTPS://staging.shop.example/sale">x</a> <a href="//staging.shop.example/sale">y</a>'
+        found = self.checks({"email/launch.html": html})
+        self.assertEqual(found.count(("blocked-host", "email/launch.html")), 2)
+
+    def test_html_entities_are_decoded(self):
+        html = "<p>Use code FALL&#48;1. The promo ends October&nbsp;31.</p>"
+        self.assertEqual(self.checks({"email/launch.html": html}), [("fact-mismatch", "email/launch.html")])
+
+    def test_approved_numbers_match_whole_tokens(self):
+        config = CONFIG + '\n[[facts]]\nname = "discount"\npattern = \'\\d+% off\'\nexpected = "25% off"\n'
+        rep = cq.run(self.make(self.email("Take 25% off. Our conversion rate is 5%.\n"), config))
+        self.assertEqual(len(rep.findings), 1)
+        self.assertIn("5%", rep.findings[0].detail)
+        self.assertNotIn("25%", rep.findings[0].detail)
+
+    def test_bad_config_exits_2(self):
+        for config in ("", CONFIG.replace('name_pattern = "^[a-z0-9]+(-[a-z0-9]+)*$"', 'name_pattern = "(["'),
+                       CONFIG.replace('tracked_domains = ["shop.example"]', "")):
+            root = self.make(self.email(f"{GOOD_LINK}\n"), config)
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()) as err:
+                self.assertEqual(cq.main([str(root)]), 2)
+            self.assertIn("campaign.toml", err.getvalue())
+
+    def test_head_rejected_retries_with_get(self):
+        import urllib.error
+        calls = []
+
+        def fake_open(url, method, timeout):
+            calls.append(method)
+            if method == "HEAD":
+                raise urllib.error.HTTPError(url, 405, "Method Not Allowed", {}, None)
+            return url
+        orig, cq._open = cq._open, fake_open
+        self.addCleanup(setattr, cq, "_open", orig)
+        rep = cq.Report(campaign="x")
+        cq.check_online([cq.Link(GOOD_LINK, "email/launch.md", 1)], rep)
+        self.assertEqual(calls, ["HEAD", "GET"])
+        self.assertEqual(rep.findings, [])
+
+
 class Cli(CampaignCase):
     def test_exit_codes(self):
         root = self.make(self.email("Use code FALL01.\n"))

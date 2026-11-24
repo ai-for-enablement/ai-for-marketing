@@ -1,5 +1,6 @@
 # What Campaign QA should find in examples/tidewater-spring-sale.
-# Every mistake in that campaign was planted on purpose and is listed here.
+# Every mistake in that campaign is listed here. Most were planted on purpose; the last
+# three judgment calls were found by the first AI review run and kept as real problems.
 #
 # [[script]]   findings the script must report: exactly these, no more, no fewer.
 # [[judgment]] mistakes only a careful reader can catch. The AI review should find them.
@@ -185,3 +186,23 @@ id = "guaranteed-delivery"
 asset = "social/instagram.md"
 keywords = ["guarantee"]
 note = "'Guaranteed delivery' is a promise the shop may not be able to keep."
+
+# ---- found by the first AI review run and kept: real problems in the sample
+
+[[judgment]]
+id = "link-in-bio"
+asset = "social/instagram.md"
+keywords = ["link in bio", "clickable", "can't be clicked", "not clickable"]
+note = "Says 'Link in bio' but pastes the link in the caption, where Instagram links can't be clicked."
+
+[[judgment]]
+id = "signup-only-cta"
+asset = "landing.html"
+keywords = ["get the deals", "no way to shop", "only signs"]
+note = "The only button, 'Get the deals', signs people up for email; the page has no way to shop the sale."
+
+[[judgment]]
+id = "form-utm"
+asset = "landing.html"
+keywords = ["utm", "attribut", "credit"]
+note = "UTM tags hardcoded in the form's action URL credit every sign-up to the newsletter, whatever channel the visitor came from."

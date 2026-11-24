@@ -41,7 +41,7 @@ Exit code 1 means the script found errors, which is normal. Exit code 2 means th
 Read `[brand]` in `campaign.toml`, then read every asset in full. Look for:
 
 - **Offer drift:** an asset promises a different discount, scope, or perk than `[brand].offer_scope`. For example, "all bikes" when only e-bikes are on sale, or free shipping nobody approved.
-- **Link intent:** a call to action that goes somewhere other than where it says, like "Shop the sale" linking to the homepage.
+- **Calls to action and channel fit:** a call to action that goes somewhere other than where it says, like "Shop the sale" linking to the homepage; a landing page that gives visitors no way to do what the campaign asks of them; links the channel won't make clickable, like a URL pasted into an Instagram caption.
 - **Unsupported claims:** superlatives, statistics, guarantees, and urgency the marketer can't back up. The script flags some words as `review`; decide for each one whether it's a real problem or fine, and catch the ones it misses, like "our biggest sale of the year".
 - **Voice and accessibility:** breaks from `[brand].voice`, all caps, jargon for the wrong audience, links and images that make no sense to a screen reader.
 - **Consistency across channels:** the emails, social posts and landing page should describe the same offer the same way.
